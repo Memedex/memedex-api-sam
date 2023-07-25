@@ -1,1 +1,10 @@
+# artifacts
 node_modules
+MemedexApi/target/**/*
+
+# build tools
+*.iml
+.aws-sam
+
+# IDE
+.idea
