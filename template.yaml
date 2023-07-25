@@ -22,11 +22,12 @@ Resources:
   getAllItemsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: src/handlers/get-all-items.getAllItemsHandler
-      Runtime: nodejs18.x
+      CodeUri: MemedexApi
+      Handler: net.ddns.memedex.handler.GetAllItems::handleRequest
+      Runtime: java17
       Architectures:
         - x86_64
-      MemorySize: 128
+      MemorySize: 512
       Timeout: 100
       Description: A simple example includes a HTTP get method to get all items from a DynamoDB table.
       Policies:
