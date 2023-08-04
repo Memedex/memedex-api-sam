@@ -1,5 +1,4 @@
 # artifacts
-node_modules
 MemedexApi/target/**/*
 
 # build tools

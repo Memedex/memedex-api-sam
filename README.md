@@ -2,9 +2,9 @@
 
 This project contains source code and supporting files for a serverless application that you can deploy with the AWS Serverless Application Model (AWS SAM) command line interface (CLI). It includes the following files and folders:
 
-- `src` - Code for the application's Lambda function.
+- `MemedexApi/src/main` - Code for the application's Lambda function.
 - `events` - Invocation events that you can use to invoke the function.
-- `__tests__` - Unit tests for the application code. 
+- `MemedexApi/src/test` - Unit tests for the application code. 
 - `template.yaml` - A template that defines the application's AWS resources.
 
 The application uses several AWS resources, including Lambda functions, an API Gateway API, and Amazon DynamoDB tables. These resources are defined in the `template.yaml` file in this project. You can update the template to add AWS resources through the same deployment process that updates your application code.
@@ -33,7 +33,7 @@ The AWS SAM CLI is an extension of the AWS CLI that adds functionality for build
 To use the AWS SAM CLI, you need the following tools:
 
 * AWS SAM CLI - [Install the AWS SAM CLI](https://docs.aws.amazon.com/serverless-application-model/latest/developerguide/serverless-sam-cli-install.html).
-* Node.js - [Install Node.js 18](https://nodejs.org/en/), including the npm package management tool.
+* Maven - [Install Maven](https://maven.apache.org/download.cgi).
 * Docker - [Install Docker community edition](https://hub.docker.com/search/?type=edition&offering=community).
 
 To build and deploy your application for the first time, run the following in your shell:
@@ -61,7 +61,7 @@ Build your application by using the `sam build` command.
 my-application$ sam build
 ```
 
-The AWS SAM CLI installs dependencies that are defined in `package.json`, creates a deployment package, and saves it in the `.aws-sam/build` folder.
+The AWS SAM CLI installs dependencies that are defined in `MemedexApi/pom.xml`, creates a deployment package, and saves it in the `.aws-sam/build` folder.
 
 Test a single function by invoking it directly with a test event. An event is a JSON document that represents the input that the function receives from the event source. Test events are included in the `events` folder in this project.
 
@@ -102,8 +102,9 @@ Resources:
   getAllItemsFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: src/handlers/get-all-items.getAllItemsHandler
-      Runtime: nodejs18.x
+      CodeUri: MemedexApi
+      Handler: net.ddns.memedex.handler.GetAllItems::handleRequest
+      Runtime: java17
       DeadLetterQueue:
         Type: SQS 
         TargetArn: !GetAtt MyQueue.Arn
@@ -138,12 +139,18 @@ You can find more information and examples about filtering Lambda function logs 
 
 ## Unit tests
 
-Tests are defined in the `__tests__` folder in this project. Use `npm` to install the [Jest test framework](https://jestjs.io/) and run unit tests.
+Tests are defined in the `MemedexApi/src/test` folder in this project. Use `mvn` to install and run unit tests.
 
 ```bash
-my-application$ npm install
-my-application$ npm run test
+my-application$ mvn test
 ```
+> When running on WSL2, you may get an error referencing an issue with Mockito. This issue can be resolved using the following to options:
+> 
+> `export JAVA_TOOL_OPTIONS="-XX:+StartAttachListener"` 
+> 
+> or
+> 
+> `mvn test -XX:+StartAttachListener`
 
 ## Cleanup
 
