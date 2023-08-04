@@ -80,11 +80,12 @@ Resources:
   putItemFunction:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: src/handlers/put-item.putItemHandler
-      Runtime: nodejs18.x
+      CodeUri: MemedexApi
+      Handler: net.ddns.memedex.handler.PutItem::handleRequest
+      Runtime: java17
       Architectures:
         - x86_64
-      MemorySize: 128
+      MemorySize: 512
       Timeout: 100
       Description: A simple example includes a HTTP post method to add one item to a DynamoDB table.
       Policies:
