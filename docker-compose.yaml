@@ -1,0 +1,24 @@
+version: '3.8'
+services:
+  sample-table-dynamodb-local:
+    command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
+    image: "amazon/dynamodb-local:latest"
+    container_name: dynamodb-local
+    ports:
+      - "8000:8000"
+    volumes:
+      - "./docker/dynamodb:/home/dynamodblocal/data"
+    working_dir: /home/dynamodblocal
+  sample-table-db-init:
+    depends_on:
+      - sample-table-dynamodb-local
+    image: amazon/aws-cli
+    container_name: db-init
+    volumes:
+      - "./json:/home"
+    working_dir: /home
+    environment:
+      AWS_ACCESS_KEY_ID: 'DUMMYIDEXAMPLE'
+      AWS_SECRET_ACCESS_KEY: 'DUMMYEXAMPLEKEY'
+    command: >-
+      dynamodb create-table --cli-input-json file://create-sample-table.json --endpoint-url http://host.docker.internal:8000 --region us-east-2

@@ -7,3 +7,6 @@ MemedexApi/target/**/*
 
 # IDE
 .idea
+
+# Local Data
+*.db

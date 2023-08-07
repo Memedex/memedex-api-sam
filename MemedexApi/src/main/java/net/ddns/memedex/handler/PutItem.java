@@ -14,11 +14,15 @@ import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
 import software.amazon.awssdk.enhanced.dynamodb.TableSchema;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.dynamodb.DynamoDbClient;
+import software.amazon.awssdk.services.dynamodb.DynamoDbClientBuilder;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
+
+import java.net.URI;
 
 @Slf4j
 public class PutItem implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     protected String tableName = System.getenv("SAMPLE_TABLE");
+    protected String AWS_ENV = System.getenv("AWS_ENV");
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context context) {
@@ -32,13 +36,17 @@ public class PutItem implements RequestHandler<APIGatewayProxyRequestEvent, APIG
         Item item = gson.fromJson(event.getBody(), Item.class);
 
         DefaultCredentialsProvider credentialsProvider = DefaultCredentialsProvider.create();
-        DynamoDbClient ddb = DynamoDbClient.builder()
+
+        DynamoDbClientBuilder ddbBuilder = DynamoDbClient.builder()
                 .region(Region.US_EAST_2)
-                .credentialsProvider(credentialsProvider)
-                .build();
+                .credentialsProvider(credentialsProvider);
+
+        if ("AWS_SAM_LOCAL".equals(AWS_ENV)) {
+            ddbBuilder.endpointOverride(URI.create("http://host.docker.internal:8000"));
+        }
 
         DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient.builder()
-                .dynamoDbClient(ddb)
+                .dynamoDbClient(ddbBuilder.build())
                 .build();
 
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
