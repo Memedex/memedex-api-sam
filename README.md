@@ -3,7 +3,7 @@
 This project contains source code and supporting files for a serverless application that you can deploy with the AWS Serverless Application Model (AWS SAM) command line interface (CLI). It includes the following files and folders:
 
 - `MemedexApi/src/main` - Code for the application's Lambda function.
-- `events` - Invocation events that you can use to invoke the function.
+- `json/events` - Invocation events that you can use to invoke the function.
 - `MemedexApi/src/test` - Unit tests for the application code. 
 - `template.yaml` - A template that defines the application's AWS resources.
 
@@ -68,14 +68,16 @@ Test a single function by invoking it directly with a test event. An event is a 
 Run functions locally and invoke them with the `sam local invoke` command.
 
 ```bash
-my-application$ sam local invoke putItemFunction --event events/event-post-item.json
-my-application$ sam local invoke getAllItemsFunction --event events/event-get-all-items.json
+my-application$ sam local invoke putItemFunction --event json/events/event-post-item.json
+my-application$ sam local invoke getAllItemsFunction --event json/events/event-get-all-items.json
 ```
 
-The AWS SAM CLI can also emulate your application's API. Use the `sam local start-api` command to run the API locally on port 3000.
+The AWS SAM CLI can also emulate your application's API. Use `docker compose up` to start a local db and `sam local start-api` command to run the API 
+locally on port 3000.
 
 ```bash
-my-application$ sam local start-api
+my-application$ docker compose up -d
+my-application$ sam local start-api --env-vars json/env.json
 my-application$ curl http://localhost:3000/
 ```
 
