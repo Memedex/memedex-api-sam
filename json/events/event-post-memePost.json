@@ -1,0 +1,4 @@
+{
+    "httpMethod": "POST",
+    "body": "{\"user\": \"test-user\", \"memeUrl\": \"https://www.example.com\"}"
+}

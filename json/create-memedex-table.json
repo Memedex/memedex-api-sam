@@ -1,0 +1,35 @@
+{
+  "TableName": "memedex",
+  "KeySchema": [
+    { "AttributeName": "PK", "KeyType": "HASH" },
+    { "AttributeName": "SK", "KeyType": "RANGE" }
+  ],
+  "AttributeDefinitions": [
+    { "AttributeName": "PK", "AttributeType": "S" },
+    { "AttributeName": "SK", "AttributeType": "S" }
+  ],
+  "ProvisionedThroughput": {
+    "ReadCapacityUnits": 5,
+    "WriteCapacityUnits": 5
+  },
+  "GlobalSecondaryIndexes" : [{
+    "IndexName" : "invertedIndex",
+    "KeySchema" : [
+      {
+        "AttributeName" : "SK",
+        "KeyType" : "HASH"
+      },
+      {
+        "AttributeName" : "PK",
+        "KeyType" : "RANGE"
+      }
+    ],
+    "Projection" : {
+      "ProjectionType" : "ALL"
+    },
+    "ProvisionedThroughput" : {
+      "ReadCapacityUnits" : 5,
+      "WriteCapacityUnits" : 5
+    }
+  }]
+}

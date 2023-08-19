@@ -2,7 +2,7 @@ package net.ddns.memedex.handler;
 
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
-import net.ddns.memedex.model.Item;
+import net.ddns.memedex.model.MemePost;
 import org.junit.Before;
 import org.junit.Test;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
@@ -14,54 +14,54 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
-public class GetAllItemsTest {
+public class GetAllMemePostsTest {
 
-    GetAllItems mockedGetAllItems;
+    GetAllMemePosts mockedGetAllMemePosts;
 
     @Before
     public void setup() {
-        mockedGetAllItems = mock(GetAllItems.class);
+        mockedGetAllMemePosts = mock(GetAllMemePosts.class);
     }
 
     @Test
     public void okResponseOnGetRequestTest() {
-        Item fakeItem = Item.builder().id("123").name("test").build();
+        MemePost fakeMemePost = MemePost.builder().user("test").id("123").build();
 
-        List<Item> fakeItems = new ArrayList<>();
-        fakeItems.add(fakeItem);
+        List<MemePost> fakeMemePosts = new ArrayList<>();
+        fakeMemePosts.add(fakeMemePost);
 
         APIGatewayProxyRequestEvent event = new APIGatewayProxyRequestEvent().withHttpMethod("GET");
 
-        when(mockedGetAllItems.getAllItems(any())).thenReturn(fakeItems);
-        when(mockedGetAllItems.handleRequest(any(), any())).thenCallRealMethod();
+        when(mockedGetAllMemePosts.getAll(any())).thenReturn(fakeMemePosts);
+        when(mockedGetAllMemePosts.handleRequest(any(), any())).thenCallRealMethod();
 
-        APIGatewayProxyResponseEvent result = mockedGetAllItems.handleRequest(event,null);
+        APIGatewayProxyResponseEvent result = mockedGetAllMemePosts.handleRequest(event,null);
 
         assertEquals(200, result.getStatusCode().intValue());
 
-        verify(mockedGetAllItems, times(1)).getAllItems(any());
+        verify(mockedGetAllMemePosts, times(1)).getAll(any());
     }
 
     @Test
     public void serverErrorResponseOnDynamoDbErrorTest() {
         APIGatewayProxyRequestEvent event = new APIGatewayProxyRequestEvent().withHttpMethod("GET");
 
-        when(mockedGetAllItems.getAllItems(any())).thenThrow(DynamoDbException.class);
-        when(mockedGetAllItems.handleRequest(any(), any())).thenCallRealMethod();
+        when(mockedGetAllMemePosts.getAll(any())).thenThrow(DynamoDbException.class);
+        when(mockedGetAllMemePosts.handleRequest(any(), any())).thenCallRealMethod();
 
-        APIGatewayProxyResponseEvent result = mockedGetAllItems.handleRequest(event,null);
+        APIGatewayProxyResponseEvent result = mockedGetAllMemePosts.handleRequest(event,null);
 
         assertEquals(400, result.getStatusCode().intValue());
 
-        verify(mockedGetAllItems, times(1)).getAllItems(any());
+        verify(mockedGetAllMemePosts, times(1)).getAll(any());
     }
 
     @Test(expected = RuntimeException.class)
     public void throwExceptionOnIncorrectRequestTest() {
         APIGatewayProxyRequestEvent event = new APIGatewayProxyRequestEvent().withHttpMethod("POST");
 
-        when(mockedGetAllItems.handleRequest(any(), any())).thenCallRealMethod();
+        when(mockedGetAllMemePosts.handleRequest(any(), any())).thenCallRealMethod();
 
-        mockedGetAllItems.handleRequest(event,null);
+        mockedGetAllMemePosts.handleRequest(event,null);
     }
 }

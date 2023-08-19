@@ -7,7 +7,8 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.extern.slf4j.Slf4j;
-import net.ddns.memedex.model.Item;
+import net.ddns.memedex.model.Entity;
+import net.ddns.memedex.model.MemePost;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbTable;
@@ -20,20 +21,20 @@ import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 import java.net.URI;
 
 @Slf4j
-public class PutItem implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
-    protected String tableName = System.getenv("SAMPLE_TABLE");
+public class PutMemePost implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+    protected String tableName = System.getenv("TABLE_NAME");
     protected String AWS_ENV = System.getenv("AWS_ENV");
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context context) {
         if (!event.getHttpMethod().equals("POST")) {
-            throw new RuntimeException("PutItem only accept POST method, you tried: " + event.getHttpMethod());
+            throw new RuntimeException("PutMemePost only accept POST method, you tried: " + event.getHttpMethod());
         }
 
         log.debug("received: {}", event);
 
         Gson gson = new GsonBuilder().create();
-        Item item = gson.fromJson(event.getBody(), Item.class);
+        MemePost memePost = gson.fromJson(event.getBody(), MemePost.class);
 
         DefaultCredentialsProvider credentialsProvider = DefaultCredentialsProvider.create();
 
@@ -52,7 +53,7 @@ public class PutItem implements RequestHandler<APIGatewayProxyRequestEvent, APIG
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
 
         try {
-            this.putItem(enhancedClient, item);
+            this.put(enhancedClient, memePost);
 
             response.withStatusCode(200);
         } catch (DynamoDbException e) {
@@ -60,14 +61,20 @@ public class PutItem implements RequestHandler<APIGatewayProxyRequestEvent, APIG
             response.withStatusCode(400).withBody(e.getMessage());
         }
 
-        log.debug("response from: {} statusCode: {} body: {}", event.getPath(), response.getStatusCode(), response.getBody());
+        log.debug("response from: {}, statusCode: {}, body: {}", event.getPath(), response.getStatusCode(), response.getBody());
         return response;
     }
 
-    protected void putItem(DynamoDbEnhancedClient enhancedClient, Item item) throws DynamoDbException {
-        DynamoDbTable<Item> sampleTable = enhancedClient.table(tableName, TableSchema.fromBean(Item.class));
+    protected void put(DynamoDbEnhancedClient enhancedClient, MemePost memePost) throws DynamoDbException {
+        DynamoDbTable<MemePost> table = enhancedClient.table(tableName, TableSchema.fromBean(MemePost.class));
 
-        // Put the item into an Amazon DynamoDB table.
-        sampleTable.putItem(item);
+        long timestamp = System.currentTimeMillis();
+        memePost.setId(Entity.MEME_POST + "#" + timestamp);
+
+        String user = memePost.getUser();
+        memePost.setUser(Entity.USER + "#" + user);
+
+        // Put the memePost into an Amazon DynamoDB table.
+        table.putItem(memePost);
     }
 }

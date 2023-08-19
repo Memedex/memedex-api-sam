@@ -1,6 +1,6 @@
 version: '3.8'
 services:
-  sample-table-dynamodb-local:
+  dynamodb-local:
     command: "-jar DynamoDBLocal.jar -sharedDb -dbPath ./data"
     image: "amazon/dynamodb-local:latest"
     container_name: dynamodb-local
@@ -9,9 +9,9 @@ services:
     volumes:
       - "./docker/dynamodb:/home/dynamodblocal/data"
     working_dir: /home/dynamodblocal
-  sample-table-db-init:
+  db-init:
     depends_on:
-      - sample-table-dynamodb-local
+      - dynamodb-local
     image: amazon/aws-cli
     container_name: db-init
     volumes:
@@ -21,4 +21,4 @@ services:
       AWS_ACCESS_KEY_ID: 'DUMMYIDEXAMPLE'
       AWS_SECRET_ACCESS_KEY: 'DUMMYEXAMPLEKEY'
     command: >-
-      dynamodb create-table --cli-input-json file://create-sample-table.json --endpoint-url http://host.docker.internal:8000 --region us-east-2
+      dynamodb create-table --cli-input-json file://create-memedex-table.json --endpoint-url http://host.docker.internal:8000 --region us-east-2

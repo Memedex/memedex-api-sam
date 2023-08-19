@@ -18,26 +18,24 @@ Resources:
   # Each Lambda function is defined by properties:
   # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
 
-  # This is a Lambda function config associated with the source code: get-all-items.js
-  getAllItemsFunction:
+  getAllMemePostsFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: MemedexApi
-      Handler: net.ddns.memedex.handler.GetAllItems::handleRequest
+      Handler: net.ddns.memedex.handler.GetAllMemePosts::handleRequest
       Runtime: java17
       Architectures:
         - x86_64
-      MemorySize: 512
+      MemorySize: 16384
       Timeout: 100
-      Description: A simple example includes a HTTP get method to get all items from a DynamoDB table.
       Policies:
-        # Give Create/Read/Update/Delete Permissions to the SampleTable
+        # Give Create/Read/Update/Delete Permissions to the MemedexTable
         - DynamoDBCrudPolicy:
-            TableName: !Ref SampleTable
+            TableName: !Ref MemedexTable
       Environment:
         Variables:
           # Make table name accessible as environment variable from function code during execution
-          SAMPLE_TABLE: !Ref SampleTable
+          TABLE_NAME: !Ref MemedexTable
           AWS_ENV: ""
       Events:
         Api:
@@ -48,26 +46,25 @@ Resources:
   # Each Lambda function is defined by properties:
   # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
 
-  # This is a Lambda function config associated with the source code: get-by-id.js
-  getByIdFunction:
+  getMemePostByIdFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: MemedexApi
-      Handler: net.ddns.memedex.handler.GetById::handleRequest
+      Handler: net.ddns.memedex.handler.GetMemePostById::handleRequest
       Runtime: java17
       Architectures:
         - x86_64
-      MemorySize: 512
+      MemorySize: 16384
       Timeout: 100
       Description: A simple example includes a HTTP get method to get one item by id from a DynamoDB table.
       Policies:
-        # Give Create/Read/Update/Delete Permissions to the SampleTable
+        # Give Create/Read/Update/Delete Permissions to the MemedexTable
         - DynamoDBCrudPolicy:
-            TableName: !Ref SampleTable
+            TableName: !Ref MemedexTable
       Environment:
         Variables:
           # Make table name accessible as environment variable from function code during execution
-          SAMPLE_TABLE: !Ref SampleTable
+          TABLE_NAME: !Ref MemedexTable
           AWS_ENV: ""
       Events:
         Api:
@@ -78,26 +75,25 @@ Resources:
   # Each Lambda function is defined by properties:
   # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
 
-  # This is a Lambda function config associated with the source code: put-item.js
-  putItemFunction:
+  putMemePostFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: MemedexApi
-      Handler: net.ddns.memedex.handler.PutItem::handleRequest
+      Handler: net.ddns.memedex.handler.PutMemePost::handleRequest
       Runtime: java17
       Architectures:
         - x86_64
-      MemorySize: 512
+      MemorySize: 16384
       Timeout: 100
       Description: A simple example includes a HTTP post method to add one item to a DynamoDB table.
       Policies:
-        # Give Create/Read/Update/Delete Permissions to the SampleTable
+        # Give Create/Read/Update/Delete Permissions to the MemedexTable
         - DynamoDBCrudPolicy:
-            TableName: !Ref SampleTable
+            TableName: !Ref MemedexTable
       Environment:
         Variables:
           # Make table name accessible as environment variable from function code during execution
-          SAMPLE_TABLE: !Ref SampleTable
+          TABLE_NAME: !Ref MemedexTable
           AWS_ENV: ""
       Events:
         Api:
@@ -105,19 +101,36 @@ Resources:
           Properties:
             Path: /
             Method: POST
-  # Simple syntax to create a DynamoDB table with a single attribute primary key, more in
-  # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlesssimpletable
 
-  # DynamoDB table to store item: {id: &lt;ID&gt;, name: &lt;NAME&gt;}
-  SampleTable:
-    Type: AWS::Serverless::SimpleTable
+  MemedexTable:
+    Type: AWS::DynamoDB::Table
     Properties:
-      PrimaryKey:
-        Name: id
-        Type: String
+      TableName: "memedex"
+      KeySchema:
+        - AttributeName: "PK"
+          KeyType: "HASH"
+        - AttributeName: "SK"
+          KeyType: "RANGE"
+      AttributeDefinitions:
+        - AttributeName: "PK"
+          AttributeType: "S"
+        - AttributeName: "SK"
+          AttributeType: "S"
       ProvisionedThroughput:
-        ReadCapacityUnits: 2
-        WriteCapacityUnits: 2
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 5
+      GlobalSecondaryIndexes:
+        - IndexName: "invertedIndex"
+          KeySchema:
+            - AttributeName: "SK"
+              KeyType: "HASH"
+            - AttributeName: "PK"
+              KeyType: "RANGE"
+          Projection:
+            ProjectionType: "ALL"
+          ProvisionedThroughput:
+            ReadCapacityUnits: 5
+            WriteCapacityUnits: 5
 
 Outputs:
   WebEndpoint:
