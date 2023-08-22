@@ -75,11 +75,11 @@ Resources:
   # Each Lambda function is defined by properties:
   # https://github.com/awslabs/serverless-application-model/blob/master/versions/2016-10-31.md#awsserverlessfunction
 
-  putMemePostFunction:
+  createMemePostFunction:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: MemedexApi
-      Handler: net.ddns.memedex.handler.PutMemePost::handleRequest
+      Handler: net.ddns.memedex.handler.CreateMemePost::handleRequest
       Runtime: java17
       Architectures:
         - x86_64
