@@ -21,14 +21,14 @@ import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 import java.net.URI;
 
 @Slf4j
-public class PutMemePost implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
+public class CreateMemePost implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     protected String tableName = System.getenv("TABLE_NAME");
     protected String AWS_ENV = System.getenv("AWS_ENV");
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent event, Context context) {
         if (!event.getHttpMethod().equals("POST")) {
-            throw new RuntimeException("PutMemePost only accept POST method, you tried: " + event.getHttpMethod());
+            throw new RuntimeException("CreateMemePost only accept POST method, you tried: " + event.getHttpMethod());
         }
 
         log.debug("received: {}", event);
@@ -53,7 +53,7 @@ public class PutMemePost implements RequestHandler<APIGatewayProxyRequestEvent, 
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
 
         try {
-            this.put(enhancedClient, memePost);
+            this.create(enhancedClient, memePost);
 
             response.withStatusCode(200);
         } catch (DynamoDbException e) {
@@ -65,7 +65,7 @@ public class PutMemePost implements RequestHandler<APIGatewayProxyRequestEvent, 
         return response;
     }
 
-    protected void put(DynamoDbEnhancedClient enhancedClient, MemePost memePost) throws DynamoDbException {
+    protected void create(DynamoDbEnhancedClient enhancedClient, MemePost memePost) throws DynamoDbException {
         DynamoDbTable<MemePost> table = enhancedClient.table(tableName, TableSchema.fromBean(MemePost.class));
 
         long timestamp = System.currentTimeMillis();
