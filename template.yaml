@@ -102,6 +102,33 @@ Resources:
             Path: /
             Method: POST
 
+  updateMemePostByIdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: MemedexApi
+      Handler: net.ddns.memedex.handler.UpdateMemePostById::handleRequest
+      Runtime: java17
+      Architectures:
+        - x86_64
+      MemorySize: 16384
+      Timeout: 100
+      Description: A simple example includes a HTTP update method to modify one item in the DynamoDB table.
+      Policies:
+        # Give Create/Read/Update/Delete Permissions to the MemedexTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MemedexTable
+      Environment:
+        Variables:
+          # Make table name accessible as environment variable from function code during execution
+          TABLE_NAME: !Ref MemedexTable
+          AWS_ENV: ""
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /{id}
+            Method: PUT
+
   deleteMemePostByIdFunction:
     Type: AWS::Serverless::Function
     Properties:
