@@ -102,6 +102,33 @@ Resources:
             Path: /
             Method: POST
 
+  deleteMemePostByIdFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: MemedexApi
+      Handler: net.ddns.memedex.handler.DeleteMemePostById::handleRequest
+      Runtime: java17
+      Architectures:
+        - x86_64
+      MemorySize: 16384
+      Timeout: 100
+      Description: A simple example includes a HTTP delete method to delete one item by id from a DynamoDB table.
+      Policies:
+        # Give Create/Read/Update/Delete Permissions to the MemedexTable
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MemedexTable
+      Environment:
+        Variables:
+          # Make table name accessible as environment variable from function code during execution
+          TABLE_NAME: !Ref MemedexTable
+          AWS_ENV: ""
+      Events:
+        Api:
+          Type: Api
+          Properties:
+            Path: /{id}
+            Method: DELETE
+
   MemedexTable:
     Type: AWS::DynamoDB::Table
     Properties:
