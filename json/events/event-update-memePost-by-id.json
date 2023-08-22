@@ -1,0 +1,7 @@
+{
+    "httpMethod": "PUT",
+    "pathParameters": {
+        "id": "id1"
+    },
+    "body": "{\"user\": \"test-user\", \"memeUrl\": \"https://www.test.example.com\"}"
+}
