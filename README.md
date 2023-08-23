@@ -78,7 +78,7 @@ locally on port 3000.
 ```bash
 my-application$ docker compose up -d
 my-application$ sam local start-api --env-vars json/env.json
-my-application$ curl http://localhost:3000/
+my-application$ curl http://localhost:3000/api/memepost/
 ```
 
 The AWS SAM CLI reads the application template to determine the API's routes and the functions that they invoke. The `Events` property on each function's definition includes the route and method for each path.
