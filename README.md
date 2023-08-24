@@ -77,7 +77,7 @@ locally on port 3000.
 
 ```bash
 my-application$ docker compose up -d
-my-application$ sam local start-api --env-vars json/env.json
+my-application$ sam local start-api --env-vars json/env.json --docker-network dynamodb-backend
 my-application$ curl http://localhost:3000/api/memepost/
 ```
 

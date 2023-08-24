@@ -41,7 +41,7 @@ public class GetAllMemePosts implements RequestHandler<APIGatewayProxyRequestEve
                 .credentialsProvider(credentialsProvider);
 
         if ("AWS_SAM_LOCAL".equals(AWS_ENV)) {
-            ddbBuilder.endpointOverride(URI.create("http://host.docker.internal:8000"));
+            ddbBuilder.endpointOverride(URI.create("http://dynamodb-local:8000"));
         }
 
         DynamoDbEnhancedClient enhancedClient = DynamoDbEnhancedClient.builder()
