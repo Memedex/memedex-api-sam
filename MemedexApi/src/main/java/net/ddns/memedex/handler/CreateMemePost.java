@@ -6,6 +6,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyRequestEvent;
 import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import jakarta.validation.*;
 import lombok.extern.slf4j.Slf4j;
 import net.ddns.memedex.model.Entity;
 import net.ddns.memedex.model.MemePost;
@@ -19,6 +20,7 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClientBuilder;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
 import java.net.URI;
+import java.util.Set;
 
 @Slf4j
 public class CreateMemePost implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
@@ -53,12 +55,23 @@ public class CreateMemePost implements RequestHandler<APIGatewayProxyRequestEven
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
 
         try {
+            ValidatorFactory factory = Validation.buildDefaultValidatorFactory();
+            Validator validator = factory.getValidator();
+            Set<ConstraintViolation<MemePost>> violations = validator.validate(memePost);
+
+            if (!violations.isEmpty()) {
+                throw new ValidationException(violations.stream().map(ConstraintViolation::getMessage).toList().toString());
+            }
+
             this.create(enhancedClient, memePost);
 
             response.withStatusCode(200);
         } catch (DynamoDbException e) {
             log.error("DynamoDb exception occurred!", e);
             response.withStatusCode(400).withBody(e.getMessage());
+        } catch (ValidationException e2) {
+            log.error("Validation error has occurred!", e2);
+            response.withStatusCode(400).withBody(e2.getMessage());
         }
 
         log.debug("response from: {}, statusCode: {}, body: {}", event.getPath(), response.getStatusCode(), response.getBody());

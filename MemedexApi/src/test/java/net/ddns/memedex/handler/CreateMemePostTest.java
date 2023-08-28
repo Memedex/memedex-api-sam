@@ -26,7 +26,7 @@ public class CreateMemePostTest {
     @Test
     public void okResponseOnGetRequestTest() {
         mockedCreateMemePost.tableName = "TEST_DB";
-        MemePost fakeMemePost = MemePost.builder().user("test").id("123").build();
+        MemePost fakeMemePost = MemePost.builder().user("test").id("123").memeUrl("https://www.example.com").build();
 
         Gson gson = new GsonBuilder().create();
         String json = gson.toJson(fakeMemePost);
@@ -44,8 +44,44 @@ public class CreateMemePostTest {
     }
 
     @Test
-    public void serverErrorResponseOnDynamoDbErrorTest() {
+    public void badRequestErrorResponseOnMissingMemeUrlTest() {
         MemePost fakeMemePost = MemePost.builder().user("test").id("123").build();
+
+        Gson gson = new GsonBuilder().create();
+        String json = gson.toJson(fakeMemePost);
+
+        APIGatewayProxyRequestEvent event = new APIGatewayProxyRequestEvent().withHttpMethod("POST").withBody(json);
+
+        when(mockedCreateMemePost.handleRequest(any(), any())).thenCallRealMethod();
+
+        APIGatewayProxyResponseEvent result = mockedCreateMemePost.handleRequest(event,null);
+
+        assertEquals(400, result.getStatusCode().intValue());
+
+        verify(mockedCreateMemePost, times(0)).create(any(), any());
+    }
+
+    @Test
+    public void badRequestErrorResponseOnMalformedMemeUrlTest() {
+        MemePost fakeMemePost = MemePost.builder().user("test").id("123").memeUrl("invalid-url").build();
+
+        Gson gson = new GsonBuilder().create();
+        String json = gson.toJson(fakeMemePost);
+
+        APIGatewayProxyRequestEvent event = new APIGatewayProxyRequestEvent().withHttpMethod("POST").withBody(json);
+
+        when(mockedCreateMemePost.handleRequest(any(), any())).thenCallRealMethod();
+
+        APIGatewayProxyResponseEvent result = mockedCreateMemePost.handleRequest(event,null);
+
+        assertEquals(400, result.getStatusCode().intValue());
+
+        verify(mockedCreateMemePost, times(0)).create(any(), any());
+    }
+
+    @Test
+    public void serverErrorResponseOnDynamoDbErrorTest() {
+        MemePost fakeMemePost = MemePost.builder().user("test").id("123").memeUrl("https://www.example.com").build();
 
         Gson gson = new GsonBuilder().create();
         String json = gson.toJson(fakeMemePost);
@@ -64,7 +100,7 @@ public class CreateMemePostTest {
 
     @Test(expected = RuntimeException.class)
     public void throwExceptionOnIncorrectMethodRequestTest() {
-        MemePost fakeMemePost = MemePost.builder().user("test").id("123").build();
+        MemePost fakeMemePost = MemePost.builder().user("test").id("123").memeUrl("https://www.example.com").build();
 
         Gson gson = new GsonBuilder().create();
         String json = gson.toJson(fakeMemePost);
