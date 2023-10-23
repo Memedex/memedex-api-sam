@@ -17,6 +17,8 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClientBuilder;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 public class DeleteMemePostById implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
@@ -29,6 +31,11 @@ public class DeleteMemePostById implements RequestHandler<APIGatewayProxyRequest
         if (!event.getHttpMethod().equals("DELETE")) {
             throw new RuntimeException("DeleteMemePostById only accept DELETE method, you tried: " + event.getHttpMethod());
         }
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Access-Control-Allow-Headers", "*");
+        headers.put("Access-Control-Allow-Origin", "*");
+        headers.put("Access-Control-Allow-Methods", "*");
 
         log.debug("received: {}", event);
 
@@ -49,6 +56,7 @@ public class DeleteMemePostById implements RequestHandler<APIGatewayProxyRequest
                 .build();
 
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
+        response.setHeaders(headers);
 
         try {
             this.deleteById(enhancedClient, id);

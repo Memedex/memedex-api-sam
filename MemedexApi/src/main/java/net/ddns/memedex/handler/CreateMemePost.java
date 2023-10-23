@@ -20,6 +20,8 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClientBuilder;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Set;
 
 @Slf4j
@@ -32,6 +34,11 @@ public class CreateMemePost implements RequestHandler<APIGatewayProxyRequestEven
         if (!event.getHttpMethod().equals("POST")) {
             throw new RuntimeException("CreateMemePost only accept POST method, you tried: " + event.getHttpMethod());
         }
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Access-Control-Allow-Headers", "*");
+        headers.put("Access-Control-Allow-Origin", "*");
+        headers.put("Access-Control-Allow-Methods", "*");
 
         log.debug("received: {}", event);
 
@@ -53,6 +60,7 @@ public class CreateMemePost implements RequestHandler<APIGatewayProxyRequestEven
                 .build();
 
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
+        response.setHeaders(headers);
 
         try {
             ValidatorFactory factory = Validation.buildDefaultValidatorFactory();

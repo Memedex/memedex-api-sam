@@ -18,7 +18,9 @@ import software.amazon.awssdk.services.dynamodb.DynamoDbClientBuilder;
 import software.amazon.awssdk.services.dynamodb.model.DynamoDbException;
 
 import java.net.URI;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
 
 @Slf4j
@@ -31,6 +33,11 @@ public class GetAllMemePosts implements RequestHandler<APIGatewayProxyRequestEve
         if (!event.getHttpMethod().equals("GET")) {
             throw new RuntimeException("GetAllMemePosts only accept GET method, you tried: " + event.getHttpMethod());
         }
+
+        Map<String, String> headers = new HashMap<>();
+        headers.put("Access-Control-Allow-Headers", "*");
+        headers.put("Access-Control-Allow-Origin", "*");
+        headers.put("Access-Control-Allow-Methods", "*");
 
         log.debug("received: {}", event);
 
@@ -49,6 +56,7 @@ public class GetAllMemePosts implements RequestHandler<APIGatewayProxyRequestEve
                 .build();
 
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent();
+        response.setHeaders(headers);
 
         try {
             List<MemePost> results = this.getAll(enhancedClient);
