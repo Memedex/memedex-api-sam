@@ -62,6 +62,8 @@ public class GetMemePostById implements RequestHandler<APIGatewayProxyRequestEve
 
         try {
             MemePost result = this.getById(enhancedClient, id);
+            result.setId(result.getId().replaceFirst(Entity.MEME_POST + "#", ""));
+            result.setUser(result.getUser().replaceFirst(Entity.USER + "#", ""));
 
             Gson gson = new GsonBuilder().create();
             String memePost = gson.toJson(result);
