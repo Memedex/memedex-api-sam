@@ -7,6 +7,7 @@ import com.amazonaws.services.lambda.runtime.events.APIGatewayProxyResponseEvent
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.extern.slf4j.Slf4j;
+import net.ddns.memedex.model.Entity;
 import net.ddns.memedex.model.MemePost;
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider;
 import software.amazon.awssdk.enhanced.dynamodb.DynamoDbEnhancedClient;
@@ -22,6 +23,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class GetAllMemePosts implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
@@ -59,9 +61,14 @@ public class GetAllMemePosts implements RequestHandler<APIGatewayProxyRequestEve
         response.setHeaders(headers);
 
         try {
+            Gson gson = new GsonBuilder().create();
             List<MemePost> results = this.getAll(enhancedClient);
 
-            Gson gson = new GsonBuilder().create();
+            for (MemePost memePost : results) {
+                memePost.setId(memePost.getId().replaceFirst(Entity.MEME_POST + "#", ""));
+                memePost.setUser(memePost.getUser().replaceFirst(Entity.USER + "#", ""));
+            }
+
             String memePosts = gson.toJson(results);
             response.withStatusCode(200).withBody(memePosts);
         } catch (DynamoDbException e) {
